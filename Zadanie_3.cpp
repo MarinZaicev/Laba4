@@ -1,78 +1,101 @@
 #include <iostream>
 #include <vector>
-#include <stdexcept>
 
 using namespace std;
 
-// Функция для генерации псевдослучайных чисел методом Фибоначчи с запаздыванием
-vector<unsigned int> generateLaggedFibonacci(
-    size_t j, size_t k,
-    const vector<unsigned int>& seed,
-    size_t count,
-    unsigned int m = 1 << 31,
-    char operation = '+')
-{
-    if (j >= k || k >= seed.size()) {
-        throw invalid_argument("Invalid j/k parameters or seed size");
-    }
-
-    vector<unsigned int> state = seed;
-    vector<unsigned int> result;
-    size_t current = 0;
-
-    for (size_t i = 0; i < count; ++i) {
-        size_t index_j = (current - j + state.size()) % state.size();
-        size_t index_k = (current - k + state.size()) % state.size();
-
-        unsigned int next_val;
-        switch (operation) {
-        case '+':
-            next_val = (state[index_j] + state[index_k]) % m;
+// Функция генерации последовательности Фибоначчи с запаздыванием
+vector<int> generateLaggedFibonacci(int j, int k, const vector<int>& initial, int m, int count, char op) {
+    vector<int> sequence = initial;
+    int n = initial.size();
+    for (int i = n; i < count + n; i++) {
+        int next_val;
+        switch (op) {
+        case '+': // Сложение
+            next_val = (sequence[i - j] + sequence[i - k]) % m;
             break;
-        case '-':
-            next_val = (state[index_j] - state[index_k]) % m;
+        case '-': // Вычитание
+            next_val = (sequence[i - j] - sequence[i - k]) % m;
             break;
-        case '*':
-            next_val = (state[index_j] * state[index_k]) % m;
+        case '*': // Умножение
+            next_val = (sequence[i - j] * sequence[i - k]) % m;
             break;
         case '^': // XOR
-            next_val = (state[index_j] ^ state[index_k]) % m;
+            next_val = (sequence[i - j] ^ sequence[i - k]) % m;
             break;
         default:
-            throw runtime_error("Unknown operation");
+            cerr << "Неизвестная операция. Используются (+, *, xor)." << endl;
+            next_val = (sequence[i - j] + sequence[i - k]) % m;
         }
-
-        state[current] = next_val;
-        current = (current + 1) % state.size();
-        result.push_back(next_val);
+        sequence.push_back(next_val);
     }
-
-    return result;
+    for (int i = 0; i < n; i++) {
+        sequence.erase(sequence.begin());
+    }
+    
+    return sequence;
+}
+void bags(int bag) {
+    if (bag < 0) {
+        cout << "число должно не должно быть отрицательным";
+        exit(0);
+    }
 }
 
 int main() {
-    try {
-        // Параметры из примера
-        size_t j = 2;
-        size_t k = 1;
-        vector<unsigned int> seed = { 1, 4 };
-        unsigned int m = 16;
-        char op = '+'; // Аддитивный метод
-        size_t count = 6;
-
-        auto sequence = generateLaggedFibonacci(j, k, seed, count, m, op);
-
-        cout << "Generated sequence: ";
-        for (auto num : sequence) {
-            cout << num << " ";
-        }
+    setlocale(LC_ALL, "Russian");
+    // Параметры генератора
+    cout << "Введите параметр j: ";
+    int j;
+    cin >> j;// Параметр j (запаздывание)
+    bags(j);
+    cout << endl;
+    cout << "Введите параметр k: ";
+    int k;
+    cin >> k;// Параметр k (запаздывание)
+    bags(k);
+    if (k > j) {
+        cout << "k не должно быть больше j";
+        exit(0);
+    }
+    cout << endl;
+    cout << "Введите кол-во чисел S: ";
+    int n;
+    cin >> n;
+    bags(n);
+    cout << endl;
+    vector<int> initial(n);
+    for (int i = 0; i < initial.size(); i++) {// Начальные значения S0, S1
+        cout << "Введите число S" << i << ": ";
+        int S;
+        cin >> S;
+        bags(S);
+        initial[i] = S;
         cout << endl;
+    }
+    cout << "Введите параметр m: ";
+    int m;
+    cin >> m;// Модуль (обычно степень 2)
+    bags(m);
+    cout << endl;
+    cout << "Введите кол-во генерируемых чисел: ";
+    int count;
+    cin >> count;    // Сколько чисел генерировать
+    bags(count);
+    cout << endl;
+    cout << "Введите операцию (+, -, *, xor): ";
+    char op;
+    cin >> op;    // Операция: +, -, *, ^ (XOR)
+    cout << endl;
 
+    // Генерация последовательности
+    vector<int> sequence = generateLaggedFibonacci(j, k, initial, m, count, op);
+
+    // Вывод результата
+    cout << "Сгенерированная последовательность: ";
+    for (int num : sequence) {
+        cout << num << " ";
     }
-    catch (const exception& e) {
-        cerr << "Error: " << e.what() << endl;
-        return 1;
-    }
+    cout << endl;
 
     return 0;
 }
